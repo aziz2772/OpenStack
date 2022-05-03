@@ -10,6 +10,8 @@ import static java.nio.file.Paths.get;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 /*
@@ -37,17 +39,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import tn.esprit.spring.entity.*;
@@ -85,18 +76,23 @@ public class EnfantController {
 	public Enfant retrieveEnfant(@PathVariable("enfant-id") String EnfantId) {
 	return EnfantService.retrieveEnfant(EnfantId);
 	}
-	
 
+	private byte[] bytes;
 	// http://localhost:8070/enfant/add-enfant
 	@CrossOrigin("http://localhost:4200")
 	@PostMapping("/add-enfant")
 	@ResponseBody
 	public Enfant addEnfant(@RequestBody Enfant e) throws Exception {
+		this.bytes = null;
 		return EnfantService.addEnfant(e);
 
 	}
-	
-	
+
+
+	@PostMapping("/uploadImage")
+	public void uploadImage(@RequestParam("imageFile") MultipartFile file) throws IOException {
+		this.bytes = file.getBytes();
+	}
 	// http://localhost:8070/enfant/remove-enfant/{enfant-id}
 	@CrossOrigin("http://localhost:4200")
 	@DeleteMapping("/remove-enfant/{enfant-id}")
@@ -160,22 +156,7 @@ public class EnfantController {
 	        EnfantExcel excel = new EnfantExcel(listenfant);
 	        excel.export(response);    
 	    }  
-/*
-		@GetMapping("/export/pdf")
-		@ResponseBody
-		public void PaymentPdf(HttpServletResponse response) throws DocumentException, IOException {
-		    response.setContentType("application/pdf");
-		    DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-		    String currentDateTime = dateFormatter.format(new Date());
-		    String headerKey = "Content-Disposition";
-		    String headerValue = "attachment; filename=Menu"+ currentDateTime + ".pdf";
-		    response.setHeader(headerKey, headerValue);
-		     
-		    List<Enfant> listenfant = EnfantService.retrieveAllEnfant();
-		    EnfantPdf pdf = new EnfantPdf(listenfant);
-		    pdf.export(response);
-		}*/
-	 
+
 		@ResponseBody
 	    @RequestMapping(value = "/export/pdf", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	    public ResponseEntity<InputStreamResource> exportToPdf() {
@@ -194,8 +175,8 @@ public class EnfantController {
 	                .contentType(MediaType.APPLICATION_PDF)
 	                .body(new InputStreamResource(bis));
 	    }
-		
-		
+
+
 /*		
 	    @PostMapping("/upload/image")
 	    public ResponseEntity uplaodImage(@RequestParam("image") MultipartFile file)

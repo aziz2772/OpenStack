@@ -48,6 +48,7 @@ public class Enfant implements Serializable {
 	@Column(name = "id")
 	private int id;
 	private String nom;
+	private String prenom;
 	private int age;
 	private Date dateN ;
 	private String sexe;
